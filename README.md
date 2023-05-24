@@ -11,13 +11,13 @@ Arguments:
 
   -h  --help                     Print help information
   -n  --num                      生成数量. Default: 5
-  -l  --len                      密码长度，在 16 到 41 之间选择一个数. Default: 16
+  -l  --len                      密码长度，在 16 到 41 之间选择一个数. Default: 20
   -c  --allow-confusing-element  允许使用容易混淆的字符
 ```
 
 ## 特性
 
-- 默认生成5个16字符长的密码，且无重复字符
+- 默认生成 5 个 20 字符长的密码，且无重复字符
 - 使用大小写字母数字和特殊符号，默认剔除易混淆符号，如小写字母 `l`，`o`，大写字母 `I`，`O`
 - 使用 `-h` 参数可查看详细选项，如 `./pg -h`
 
@@ -45,3 +45,5 @@ for Linux user
 ```shell
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o target/pg main.go
 ```
+
+把生成的可执行文件复制到 `Path` 环境变量指示的路径下即可。

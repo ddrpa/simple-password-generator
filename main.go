@@ -18,6 +18,7 @@ const (
 	UpperLettersNoConfusingChar = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 	Digits                      = "0123456789"
 	Symbols                     = "~!@#$%^&*()_+-={}[]:<>?,./"
+	Version                     = "20230524"
 )
 
 func generate(letters string, length int) (string, error) {
@@ -59,16 +60,22 @@ func validateLengthOfWantedPassword(args []string) error {
 }
 
 func main() {
-	parser := argparse.NewParser("pg", "生成安全的密码")
+	parser := argparse.NewParser("pg", "Generate strong password, version "+Version)
 	number := parser.Int("n", "num", &argparse.Options{Required: false, Default: 5, Help: "生成数量"})
-	length := parser.Int("l", "len", &argparse.Options{Required: false, Default: 16, Help: "密码长度，在 16 到 41 之间选择一个数", Validate: validateLengthOfWantedPassword})
+	length := parser.Int("l", "len", &argparse.Options{Required: false, Default: 20, Help: "密码长度，在 16 到 41 之间选择一个数", Validate: validateLengthOfWantedPassword})
 	allowConfusingElement := parser.Flag("c", "allow-confusing-element", &argparse.Options{Required: false, Help: "允许使用容易混淆的字符"})
+	showVersion := parser.Flag("v", "version", &argparse.Options{Required: false, Help: "显示版本"})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
 		// In case of error print error and print usage
 		// This can also be done by passing -h or --help flags
 		fmt.Print(parser.Usage(err))
+		return
+	}
+
+	if *showVersion {
+		fmt.Println("password generator version " + Version)
 		return
 	}
 
