@@ -18,7 +18,7 @@ const (
 	UpperLettersNoConfusingChar = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 	Digits                      = "0123456789"
 	Symbols                     = "~!@#$%^&*()_+-={}[]:<>?,./"
-	Version                     = "20230524"
+	Version                     = "1.0.0"
 )
 
 func generate(letters string, length int) (string, error) {
