@@ -18,7 +18,7 @@ const (
 	UpperLettersNoConfusingChar = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 	Digits                      = "0123456789"
 	Symbols                     = "~!@#$%^&*()_+-={}[]:<>?,./"
-	Version                     = "1.0.0"
+	Version                     = "1.1.0"
 )
 
 func generate(letters string, length int) (string, error) {
@@ -59,6 +59,16 @@ func validateLengthOfWantedPassword(args []string) error {
 	return nil
 }
 
+/**
+ * @description: 验证密码强度是否符合常见系统的强密码检测规则
+ */
+func verifyPasswordHasAllRequiredChar(password string) bool {
+	return strings.ContainsAny(password, LowerLetters) &&
+		strings.ContainsAny(password, UpperLetters) &&
+		strings.ContainsAny(password, Digits) &&
+		strings.ContainsAny(password, Symbols)
+}
+
 func main() {
 	parser := argparse.NewParser("pg", "Generate strong password, version "+Version)
 	number := parser.Int("n", "num", &argparse.Options{Required: false, Default: 5, Help: "生成数量"})
@@ -93,6 +103,10 @@ func main() {
 
 	for i := 0; i < iter; i++ {
 		result, _ := generate(letters, *length)
-		fmt.Println(result)
+		if verifyPasswordHasAllRequiredChar(result) {
+			fmt.Println(result)
+		} else {
+			i--
+		}
 	}
 }

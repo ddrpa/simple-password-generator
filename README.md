@@ -17,33 +17,11 @@ Arguments:
 
 ## 特性
 
-- 默认生成 5 个 20 字符长的密码，且无重复字符
+- 默认生成 5 个 20 字符长的密码
+- 单个密码中每个字符只会出现一次
+- 确保数字、大小写字母和特殊符号都有出现
 - 使用大小写字母数字和特殊符号，默认剔除易混淆符号，如小写字母 `l`，`o`，大写字母 `I`，`O`
-- 使用 `-h` 参数可查看详细选项，如 `./pg -h`
 
 ## 怎样编译
 
-因为我只在一台 Macbook 上有 golang 环境，以下使用了交叉编译，如果你不需要跨平台，可以直接使用 `go build`
-
-for Windows user
-
-```shell
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o target/pg.exe main.go
-```
-
-for macOS user
-
-```shell
-# x86_64
-CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o target/pg main.go
-# apple silicon
-CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o target/pg main.go
-```
-
-for Linux user
-
-```shell
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o target/pg main.go
-```
-
-把生成的可执行文件复制到 `Path` 环境变量指示的路径下即可。
+详见 `release.sh`
