@@ -2,61 +2,83 @@ package main
 
 import (
 	"crypto/rand"
-	"errors"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"math/big"
 	"os"
-	"strconv"
 	"strings"
 )
 
 const (
+	Version                     = "1.2.0"
 	LowerLetters                = "abcdefghijklmnopqrstuvwxyz"
 	UpperLetters                = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	LowerLettersNoConfusingChar = "abcdefghijkmnpqrstuvwxyz"
 	UpperLettersNoConfusingChar = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 	Digits                      = "0123456789"
-	Symbols                     = "~!@#$%^&*()_+-={}[]:<>?,./"
-	Version                     = "1.1.0"
 )
 
-func generate(letters string, length int) (string, error) {
-	var sequence string
-	for i := 0; i < length; i++ {
-		char, err := randomElement(letters)
-		if err != nil {
-			return "", err
-		}
+// Symbols 如果用户提供了自定义符号集合，会替换该变量
+var Symbols = "~!@#$%^&*()_+-={}[]:<>?,./"
 
-		if strings.Contains(sequence, char) {
+func contains(elems []rune, v rune) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+func generate(letters []rune, length int) (string, error) {
+	var sequence []rune
+	collectionSize := big.NewInt(int64(len(letters)))
+	for i := 0; i < length; i++ {
+		n, err := rand.Int(rand.Reader, collectionSize)
+		if err != nil {
 			i--
 			continue
 		}
-		sequence += char
+
+		char := letters[n.Int64()]
+
+		// if sequence contains char, then i--
+		if contains(sequence, char) {
+			i--
+			continue
+		}
+
+		sequence = append(sequence, char)
 	}
-	return sequence, nil
+	return string(sequence), nil
 }
 
-func randomElement(s string) (string, error) {
-	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(s))))
-	if err != nil {
-		return "", err
+func validateLengthOfWantedPassword(collectionLength int, wantedLength int) error {
+	if wantedLength < 16 {
+		return fmt.Errorf("密码长度不能小于16")
 	}
-	return string(s[n.Int64()]), nil
-}
-
-func validateLengthOfWantedPassword(args []string) error {
-	length, err := strconv.Atoi(args[0])
-	if err != nil {
-		return err
-	}
-	if length < 16 {
-		return errors.New("密码长度不能小于16")
-	} else if length > 41 {
-		return errors.New("别开玩笑了，KDF 不一定能转换到更大的集合里面去")
+	if wantedLength > collectionLength {
+		return fmt.Errorf("字符集不足以创建指定长度的密码")
 	}
 	return nil
+}
+
+func removeDuplicateSymbol(s string) (string, error) {
+	var result string
+	for _, c := range s {
+		if strings.ContainsRune(LowerLetters, c) ||
+			strings.ContainsRune(UpperLetters, c) ||
+			strings.ContainsRune(Digits, c) ||
+			strings.ContainsRune(result, c) {
+			continue
+		}
+		result += string(c)
+	}
+	if len(result) == 0 {
+		return "", fmt.Errorf("无法筛选出有效的自定义符号")
+	} else {
+		return result, nil
+	}
 }
 
 /**
@@ -72,8 +94,9 @@ func verifyPasswordHasAllRequiredChar(password string) bool {
 func main() {
 	parser := argparse.NewParser("pg", "Generate strong password, version "+Version)
 	number := parser.Int("n", "num", &argparse.Options{Required: false, Default: 5, Help: "生成数量"})
-	length := parser.Int("l", "len", &argparse.Options{Required: false, Default: 20, Help: "密码长度，在 16 到 41 之间选择一个数", Validate: validateLengthOfWantedPassword})
+	length := parser.Int("l", "len", &argparse.Options{Required: false, Default: 20, Help: "密码长度"})
 	allowConfusingElement := parser.Flag("c", "allow-confusing-element", &argparse.Options{Required: false, Help: "允许使用容易混淆的字符"})
+	customSymbol := parser.String("s", "symbol", &argparse.Options{Required: false, Help: "自定义符号"})
 	showVersion := parser.Flag("v", "version", &argparse.Options{Required: false, Help: "显示版本"})
 
 	err := parser.Parse(os.Args)
@@ -94,15 +117,30 @@ func main() {
 		iter = 5
 	}
 
-	letters := Digits + Symbols
+	letters := Digits
+	if *customSymbol != "" {
+		customSymbolChar, err := removeDuplicateSymbol(*customSymbol)
+		Symbols = customSymbolChar
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 	if *allowConfusingElement {
-		letters += LowerLetters + UpperLetters
+		letters += Symbols + LowerLetters + UpperLetters
 	} else {
-		letters += LowerLettersNoConfusingChar + UpperLettersNoConfusingChar
+		letters += Symbols + LowerLettersNoConfusingChar + UpperLettersNoConfusingChar
+	}
+	lettersAsRuneArray := []rune(letters)
+
+	err = validateLengthOfWantedPassword(len(lettersAsRuneArray), *length)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
 	for i := 0; i < iter; i++ {
-		result, _ := generate(letters, *length)
+		result, _ := generate(lettersAsRuneArray, *length)
 		if verifyPasswordHasAllRequiredChar(result) {
 			fmt.Println(result)
 		} else {
