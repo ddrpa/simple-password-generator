@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	Version                     = "1.2.0"
+	Version                     = "1.3.0"
 	LowerLetters                = "abcdefghijklmnopqrstuvwxyz"
 	UpperLetters                = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	LowerLettersNoConfusingChar = "abcdefghijkmnpqrstuvwxyz"
@@ -19,7 +19,10 @@ const (
 )
 
 // Symbols 如果用户提供了自定义符号集合，会替换该变量
-var Symbols = "~!@#$%^&*()_+-={}[]:<>?,./"
+var Symbols = "_~!@#$%^&*()-=<>,.?;:|+{}[]/"
+
+// SymbolsFlavorMySQL8 MySQL 8 支持在密码中使用的特殊符号
+var SymbolsFlavorMySQL8 = "_~!@#$%^&*()-=<>,.?;:|"
 
 func contains(elems []rune, v rune) bool {
 	for _, s := range elems {
@@ -96,8 +99,9 @@ func main() {
 	number := parser.Int("n", "num", &argparse.Options{Required: false, Default: 5, Help: "生成数量"})
 	length := parser.Int("l", "len", &argparse.Options{Required: false, Default: 20, Help: "密码长度"})
 	allowConfusingElement := parser.Flag("c", "allow-confusing-element", &argparse.Options{Required: false, Help: "允许使用容易混淆的字符"})
-	customSymbol := parser.String("s", "symbol", &argparse.Options{Required: false, Help: "自定义符号"})
-	showVersion := parser.Flag("v", "version", &argparse.Options{Required: false, Help: "显示版本"})
+	flavor := parser.String("f", "flavor", &argparse.Options{Required: false, Help: "使用特定系统支持的特殊符号集合，目前支持 mysql8"})
+	customSymbol := parser.String("s", "symbol", &argparse.Options{Required: false, Help: "自定义特殊符号集合"})
+	showVersion := parser.Flag("v", "version", &argparse.Options{Required: false, Help: "版本"})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -118,7 +122,9 @@ func main() {
 	}
 
 	letters := Digits
-	if *customSymbol != "" {
+	if *flavor == "mysql8" {
+		Symbols = SymbolsFlavorMySQL8
+	} else if *customSymbol != "" {
 		customSymbolChar, err := removeDuplicateSymbol(*customSymbol)
 		Symbols = customSymbolChar
 		if err != nil {

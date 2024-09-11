@@ -3,21 +3,29 @@
 ```shell
 $ pg -h
 usage: pg [-h|--help] [-n|--num <integer>] [-l|--len <integer>]
-          [-c|--allow-confusing-element] [-s|--symbol "<value>"] [-v|--version]
+          [-c|--allow-confusing-element] [-f|--flavor "<value>"] [-s|--symbol
+          "<value>"] [-v|--version]
 
-          Generate strong password, version 1.2.0
+          Generate strong password, version 1.3.0
 
 Arguments:
 
   -h  --help                     Print help information
   -n  --num                      生成数量. Default: 5
-  -l  --len                      密码长度
+  -l  --len                      密码长度. Default: 20
   -c  --allow-confusing-element  允许使用容易混淆的字符
-  -s  --symbol                   自定义符号
-  -v  --version                  显示版本
+  -f  --flavor                  
+                                 使用特定系统支持的特殊符号集合，目前支持
+                                 mysql8
+  -s  --symbol                   自定义特殊符号集合
+  -v  --version                  版本
 ```
 
 ## Changelog
+
+**Version 1.3.0**
+
+增加 `[-f|--flavor "<value>"]` 参数，支持使用特定系统支持的特殊符号集合，目前支持 `mysql8`。
 
 **Version 1.2.0**
 
