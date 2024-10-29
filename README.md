@@ -6,7 +6,7 @@ usage: pg [-h|--help] [-n|--num <integer>] [-l|--len <integer>]
           [-c|--allow-confusing-element] [-f|--flavor "<value>"] [-s|--symbol
           "<value>"] [-v|--version]
 
-          Generate strong password, version 1.3.0
+          Generate strong password, version 1.4.0
 
 Arguments:
 
@@ -16,12 +16,19 @@ Arguments:
   -c  --allow-confusing-element  允许使用容易混淆的字符
   -f  --flavor                  
                                  使用特定系统支持的特殊符号集合，目前支持
-                                 mysql8
+                                 mysql8 和 redis
   -s  --symbol                   自定义特殊符号集合
   -v  --version                  版本
 ```
 
 ## Changelog
+
+**Version 1.4.0**
+
+`[-f|--flavor "<value>"]` 参数支持 `redis`（满足 Redis v6.2.12 之前版本的额外要求）:
+
+- 使用特定的特殊字符集合
+- 密码首位为字母
 
 **Version 1.3.0**
 
